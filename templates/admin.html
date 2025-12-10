@@ -92,6 +92,26 @@
                     <span class="status-badge status-{{ info.status|lower }}">{{ info.status }}</span>
                 </div>
                 <div class="priority-bar priority-{% if 'High' in info.ai_report %}high{% elif 'Medium' in info.ai_report %}medium{% elif 'Low' in info.ai_report %}low{% else %}normal{% endif %}"></div>
+                <div class="location-section" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #fbbf24;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #92400e; font-weight: 700; font-size: 0.875rem;">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Location Details</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; font-size: 0.875rem;">
+                        <div>
+                            <div style="color: #78350f; font-weight: 600; margin-bottom: 0.25rem;">State</div>
+                            <div style="color: #92400e;">{{ info.state }}</div>
+                        </div>
+                        <div>
+                            <div style="color: #78350f; font-weight: 600; margin-bottom: 0.25rem;">City</div>
+                            <div style="color: #92400e;">{{ info.city }}</div>
+                        </div>
+                        <div>
+                            <div style="color: #78350f; font-weight: 600; margin-bottom: 0.25rem;">Area</div>
+                            <div style="color: #92400e;">{{ info.location }}</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="ai-section">
                     <div class="ai-header"><i class="fas fa-robot"></i><span>AI Analysis Report</span></div>
                     <div class="ai-content">{{ info.ai_report }}</div>

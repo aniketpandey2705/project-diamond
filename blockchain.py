@@ -7,9 +7,9 @@ class Blockchain:
     def __init__(self):
         self.chain = []
         self.pending_data = []
-        # Create genesis block
         self.create_block(proof=1, previous_hash='0', data='Genesis Block')
 
+    # Create a new block and add it to the chain
     def create_block(self, proof, previous_hash, data=None):
         block = {
             'index': len(self.chain) + 1,
@@ -22,8 +22,8 @@ class Blockchain:
         self.chain.append(block)
         return block
 
+    # Add grievance data to be included in next block
     def add_data(self, grievance_id, audio_hash, status):
-        """Add grievance data to pending transactions"""
         data = {
             'grievance_id': grievance_id,
             'audio_hash': audio_hash,
@@ -33,28 +33,26 @@ class Blockchain:
         self.pending_data.append(data)
         return data
 
+    # Get the most recent block in the chain
     def get_last_block(self):
         return self.chain[-1]
 
+    # Generate SHA-256 hash of a block
     def hash(self, block):
-        """Generate SHA-256 hash of a block"""
         encoded_block = json.dumps(block, sort_keys=True).encode()
         return hashlib.sha256(encoded_block).hexdigest()
 
+    # Verify blockchain integrity by checking all hash links
     def is_chain_valid(self):
-        """Verify the entire blockchain integrity with detailed error reporting"""
         previous_block = self.chain[0]
         block_index = 1
         tampering_details = []
         
         while block_index < len(self.chain):
             block = self.chain[block_index]
-            
-            # Calculate what the previous hash should be
             expected_previous_hash = self.hash(previous_block)
             actual_previous_hash = block['previous_hash']
             
-            # Check if previous hash matches
             if actual_previous_hash != expected_previous_hash:
                 tampering_details.append({
                     'block_index': block_index,
@@ -70,8 +68,8 @@ class Blockchain:
         
         return True, "✅ Blockchain is valid and immutable", []
 
+    # Generate detailed verification report for admin dashboard
     def get_verification_report(self):
-        """Generate detailed verification report with tampering detection"""
         is_valid, message, tampering_details = self.is_chain_valid()
         
         report = {
@@ -86,14 +84,12 @@ class Blockchain:
             'blocks': []
         }
         
-        # Add details for each block with validation status
         previous_block = None
         for block in self.chain:
             block_hash = self.hash(block)
             is_block_valid = True
             error_message = None
             
-            # Check if this block is tampered
             if previous_block:
                 expected_prev_hash = self.hash(previous_block)
                 if block['previous_hash'] != expected_prev_hash:
@@ -114,8 +110,8 @@ class Blockchain:
         
         return report
 
+    # Find which block contains a specific grievance ID
     def find_grievance_in_chain(self, grievance_id):
-        """Find which block contains a specific grievance"""
         for block in self.chain:
             if isinstance(block['data'], list):
                 for data in block['data']:
