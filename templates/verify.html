@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Verification | Prahari</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .verify-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .verification-badge {
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 20px;
+            color: white;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
+        }
+
+        .verification-badge.invalid {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.3);
+        }
+
+        .verification-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .block-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #10b981;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .block-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .hash-display {
+            background: #0f172a;
+            color: #10b981;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            margin: 0.5rem 0;
+        }
+
+        .chain-link {
+            text-align: center;
+            color: #64748b;
+            margin: 1rem 0;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-box h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0.5rem 0;
+        }
+
+        .stat-box p {
+            color: #64748b;
+            margin: 0;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar-premium">
+        <div class="container-fluid px-4">
+            <div class="d-flex align-items-center">
+                <div class="logo-container">
+                    <i class="fas fa-shield-halved"></i>
+                    <span class="logo-text">PRAHARI</span>
+                    <span class="logo-subtitle">Blockchain Verification</span>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <a href="/admin" class="btn btn-sm"
+                    style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="verify-container">
+        <div class="verification-badge {% if not report.is_valid %}invalid{% endif %}">
+            <div class="verification-icon">
+                {% if report.is_valid %}
+                <i class="fas fa-shield-check"></i>
+                {% else %}
+                <i class="fas fa-shield-xmark"></i>
+                {% endif %}
+            </div>
+            <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;">
+                {{ report.chain_integrity }}
+            </h1>
+            <p style="font-size: 1.25rem; opacity: 0.9; margin: 0;">
+                {{ report.message }}
+            </p>
+        </div>
+
+        {% if report.tampering_detected %}
+        <div
+            style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 2rem; border-radius: 16px; margin-bottom: 2rem; border: 2px solid #ef4444;">
+            <h3 style="color: #991b1b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-exclamation-triangle"></i> TAMPERING DETECTED
+            </h3>
+            <p style="color: #7f1d1d; margin-bottom: 1rem; font-weight: 600;">
+                The blockchain integrity check has failed. One or more blocks have been altered after creation.
+            </p>
+            {% for detail in report.tampering_details %}
+            <div
+                style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; border-left: 4px solid #ef4444;">
+                <strong style="color: #991b1b;">Block #{{ detail.block_index }}:</strong>
+                <span style="color: #7f1d1d;">{{ detail.message }}</span>
+                <div style="margin-top: 0.5rem; font-size: 0.875rem;">
+                    <div style="color: #059669;"><strong>Expected Hash:</strong> <code
+                            style="background: #f0fdf4; padding: 0.25rem 0.5rem; border-radius: 4px;">{{ detail.expected_hash[:32] }}...</code>
+                    </div>
+                    <div style="color: #dc2626; margin-top: 0.25rem;"><strong>Actual Hash:</strong> <code
+                            style="background: #fef2f2; padding: 0.25rem 0.5rem; border-radius: 4px;">{{ detail.actual_hash[:32] }}...</code>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <div style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.5); border-radius: 8px;">
+                <strong style="color: #991b1b;">What This Means:</strong>
+                <ul style="color: #7f1d1d; margin: 0.5rem 0 0 1.5rem; line-height: 1.8;">
+                    <li>Someone modified data in Block #{{ report.tampering_details[0].block_index }}</li>
+                    <li>The cryptographic hash no longer matches</li>
+                    <li>All subsequent blocks are now invalid</li>
+                    <li>This proves the blockchain detected the tampering</li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <i class="fas fa-cubes" style="font-size: 2rem; color: #3b82f6;"></i>
+                <h3>{{ report.total_blocks }}</h3>
+                <p>Total Blocks</p>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-fingerprint" style="font-size: 2rem; color: #10b981;"></i>
+                <h3>SHA-256</h3>
+                <p>Hash Algorithm</p>
+            </div>
+            <div class="stat-box">
+                <i class="fas fa-lock" style="font-size: 2rem; color: #8b5cf6;"></i>
+                <h3>Immutable</h3>
+                <p>Tamper-Proof</p>
+            </div>
+        </div>
+
+        <div
+            style="background: white; padding: 2rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-cube"></i> Genesis Block Hash
+            </h3>
+            <div class="hash-display">{{ report.genesis_hash }}</div>
+
+            <h3 style="margin: 1.5rem 0 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-cube"></i> Latest Block Hash
+            </h3>
+            <div class="hash-display">{{ report.latest_hash }}</div>
+        </div>
+
+        <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-link"></i> Complete Blockchain
+        </h2>
+
+        {% for block in report.blocks %}
+        <div class="block-card"
+            style="{% if not block.is_valid %}border-left-color: #ef4444; background: #fef2f2;{% endif %}">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h4 style="margin: 0; color: #0f172a;">
+                    <i class="fas fa-cube"></i> Block #{{ block.index }}
+                </h4>
+                {% if block.is_valid %}
+                <span
+                    style="background: #10b981; color: white; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">
+                    <i class="fas fa-check"></i> VERIFIED
+                </span>
+                {% else %}
+                <span
+                    style="background: #ef4444; color: white; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">
+                    <i class="fas fa-times"></i> INVALID
+                </span>
+                {% endif %}
+            </div>
+
+            {% if not block.is_valid %}
+            <div
+                style="background: #fee2e2; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid #ef4444;">
+                <strong style="color: #991b1b;"><i class="fas fa-exclamation-circle"></i> Error:</strong>
+                <span style="color: #7f1d1d;">{{ block.error_message }}</span>
+            </div>
+            {% endif %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <small style="color: #64748b; font-weight: 600;">Timestamp</small>
+                    <p style="margin: 0.25rem 0 0; color: #0f172a;">{{ block.timestamp }}</p>
+                </div>
+                <div>
+                    <small style="color: #64748b; font-weight: 600;">Data Records</small>
+                    <p style="margin: 0.25rem 0 0; color: #0f172a;">{{ block.data_count }}</p>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 0.5rem;">
+                <small style="color: #64748b; font-weight: 600;">Block Hash</small>
+                <div class="hash-display" style="font-size: 0.75rem;">{{ block.hash }}</div>
+            </div>
+
+            <div>
+                <small style="color: #64748b; font-weight: 600;">Previous Hash</small>
+                <div class="hash-display" style="font-size: 0.75rem;">{{ block.previous_hash }}</div>
+            </div>
+        </div>
+
+        {% if not loop.last %}
+        <div class="chain-link">
+            <i class="fas fa-arrow-down" style="font-size: 1.5rem;"></i>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+
+
+        <div
+            style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 2rem; border-radius: 16px; margin-top: 2rem; border: 2px solid #bae6fd;">
+            <h4 style="color: #0369a1; margin-bottom: 1rem;">
+                <i class="fas fa-info-circle"></i> How Blockchain Verification Works
+            </h4>
+            <ul style="color: #0c4a6e; line-height: 1.8;">
+                <li><strong>Cryptographic Hashing:</strong> Each block contains a SHA-256 hash of the previous block
+                </li>
+                <li><strong>Chain Integrity:</strong> Any tampering breaks the hash chain and is immediately detected
+                </li>
+                <li><strong>Immutability:</strong> Once recorded, grievance data cannot be altered or deleted</li>
+                <li><strong>Transparency:</strong> All blocks can be independently verified by anyone</li>
+            </ul>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

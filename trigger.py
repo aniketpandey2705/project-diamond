@@ -1,19 +1,22 @@
+import os
+from dotenv import load_dotenv
 from twilio.rest import Client
 
-# --- CONFIGURATION ---
-# Find these on your Twilio Dashboard home screen
-#account_sid = '' 
-#auth_token = ''
+# Load environment variables
+load_dotenv()
 
-# Your Twilio Phone Number (from the dashboard)
-#twilio_number = '' 
+# Get credentials from .env
+account_sid = os.getenv('account_sid')
+auth_token = os.getenv('auth_token')
+twilio_number = os.getenv('twilio_number')
+my_mobile_number = os.getenv('my_mobile_number')
 
-# Your Personal Mobile Number (must be verified if on Trial)
-#my_mobile_number = '' 
+# Your Ngrok URL (update this when ngrok restarts)
+webhook_url = 'https://codi-interpressure-jacqui.ngrok-free.dev/voice'
 
-# Your Ngrok URL (Copy from terminal, make sure to add /voice)
-#webhook_url = ''
-# ---------------------
+# Validate credentials
+if not all([account_sid, auth_token, twilio_number, my_mobile_number]):
+    raise ValueError("Missing Twilio credentials in .env file")
 
 client = Client(account_sid, auth_token)
 
