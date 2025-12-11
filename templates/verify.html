@@ -1,298 +1,613 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blockchain Verification | Prahari</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Blockchain Verification - PRAHARI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .verify-container {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.5;
+        }
+
+        .navbar {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            color: #475569;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .container {
             max-width: 1200px;
-            margin: 2rem auto;
-            padding: 2rem;
+            margin: 0 auto;
+            padding: 32px;
         }
 
-        .verification-badge {
-            text-align: center;
-            padding: 3rem;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            border-radius: 20px;
-            color: white;
-            margin-bottom: 2rem;
-            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
+        .search-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
         }
 
-        .verification-badge.invalid {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.3);
+        .search-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
         }
 
-        .verification-icon {
-            font-size: 5rem;
-            margin-bottom: 1rem;
-            animation: scaleIn 0.5s ease;
+        .search-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 16px;
         }
 
-        @keyframes scaleIn {
-            from {
-                transform: scale(0);
-            }
-
-            to {
-                transform: scale(1);
-            }
+        .search-form {
+            display: flex;
+            gap: 12px;
         }
 
-        .block-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border-left: 4px solid #10b981;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: 'Courier New', monospace;
         }
 
-        .block-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-btn {
+            padding: 12px 24px;
+            background: #3b82f6;
+            border: none;
+            border-radius: 6px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-btn:hover {
+            background: #2563eb;
+        }
+
+        .result-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .result-success {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .result-error {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-title.success {
+            color: #065f46;
+        }
+
+        .result-title.error {
+            color: #991b1b;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .result-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .result-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-size: 14px;
+            color: #0f172a;
+            font-weight: 600;
         }
 
         .hash-display {
             background: #0f172a;
             color: #10b981;
-            padding: 1rem;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 6px;
             font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
+            font-size: 12px;
             word-break: break-all;
-            margin: 0.5rem 0;
+            margin-top: 8px;
         }
 
-        .chain-link {
-            text-align: center;
-            color: #64748b;
-            margin: 1rem 0;
-        }
-
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-box {
-            background: white;
-            padding: 1.5rem;
+        .status-badge {
+            padding: 4px 12px;
             border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-resolved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .verification-badge {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 32px;
             text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
         }
 
-        .stat-box h3 {
-            font-size: 2rem;
+        .verification-badge.valid {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .verification-badge.invalid {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .verification-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .verification-title {
+            font-size: 32px;
             font-weight: 800;
-            color: #0f172a;
-            margin: 0.5rem 0;
+            margin-bottom: 8px;
         }
 
-        .stat-box p {
+        .verification-title.valid {
+            color: #065f46;
+        }
+
+        .verification-title.invalid {
+            color: #991b1b;
+        }
+
+        .verification-message {
+            font-size: 16px;
             color: #64748b;
-            margin: 0;
-            font-size: 0.875rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 8px 0;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .block-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .block-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .block-verified {
+            padding: 4px 12px;
+            background: #d1fae5;
+            color: #065f46;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .block-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #0f172a;
+            margin-top: 4px;
+        }
+
+        .ticket-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .ticket-badge {
+            background: #eff6ff;
+            color: #1e40af;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #bfdbfe;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 16px;
         }
     </style>
 </head>
-
 <body>
-    <nav class="navbar-premium">
-        <div class="container-fluid px-4">
-            <div class="d-flex align-items-center">
-                <div class="logo-container">
-                    <i class="fas fa-shield-halved"></i>
-                    <span class="logo-text">PRAHARI</span>
-                    <span class="logo-subtitle">Blockchain Verification</span>
+    <div class="navbar">
+        <div class="brand">PRAHARI</div>
+        <a href="/login" class="back-btn">← Admin Login</a>
+    </div>
+
+    <div class="container">
+        <!-- Search Box -->
+        <div class="search-box">
+            <div class="search-title">Verify Your Grievance</div>
+            <div class="search-subtitle">Enter your 6-digit ticket ID to verify your complaint is secured on the blockchain</div>
+            <form method="GET" action="/verify_blockchain" class="search-form">
+                <input type="text" name="id" class="search-input" placeholder="Enter Ticket ID (e.g., 123456)" 
+                    value="{{ search_id if search_id else '' }}" pattern="[0-9]{6}" maxlength="6" required>
+                <button type="submit" class="search-btn">🔍 Verify</button>
+            </form>
+        </div>
+
+        <!-- Search Result -->
+        {% if search_id %}
+            {% if search_result and search_result.found %}
+            <div class="result-box result-success">
+                <div class="result-title success">✓ Grievance Found & Verified!</div>
+                <div class="result-grid">
+                    <div class="result-field">
+                        <div class="result-label">Ticket ID</div>
+                        <div class="result-value" style="font-family: 'Courier New', monospace; font-size: 18px;">#{{ search_id }}</div>
+                    </div>
+                    <div class="result-field">
+                        <div class="result-label">Block Number</div>
+                        <div class="result-value">Block #{{ search_result.block_index }}</div>
+                    </div>
+                    <div class="result-field">
+                        <div class="result-label">Recorded On</div>
+                        <div class="result-value">{{ search_result.timestamp }}</div>
+                    </div>
+                    <div class="result-field">
+                        <div class="result-label">Status</div>
+                        <div class="result-value">
+                            <span class="status-badge {% if search_result.grievance.status == 'Resolved' %}status-resolved{% else %}status-pending{% endif %}">
+                                {{ search_result.grievance.status if search_result.grievance else 'N/A' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-field">
+                    <div class="result-label">Block Hash (Proof of Immutability)</div>
+                    <div class="hash-display">{{ search_result.block_hash }}</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.7); padding: 12px; border-radius: 6px; margin-top: 16px;">
+                    <p style="color: #065f46; margin: 0; font-weight: 600; font-size: 14px;">
+                        🛡️ Your complaint is permanently secured on the blockchain and cannot be tampered with or deleted.
+                    </p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-3">
-                <a href="/admin" class="btn btn-sm"
-                    style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </a>
+            {% else %}
+            <div class="result-box result-error">
+                <div class="result-title error">✗ Grievance Not Found</div>
+                <p style="color: #7f1d1d; margin: 0;">
+                    Ticket ID <strong>#{{ search_id }}</strong> was not found in the blockchain. Please check your ID and try again.
+                </p>
             </div>
-        </div>
-    </nav>
+            {% endif %}
+        {% endif %}
 
-    <div class="verify-container">
-        <div class="verification-badge {% if not report.is_valid %}invalid{% endif %}">
-            <div class="verification-icon">
-                {% if report.is_valid %}
-                <i class="fas fa-shield-check"></i>
-                {% else %}
-                <i class="fas fa-shield-xmark"></i>
-                {% endif %}
-            </div>
-            <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem;">
+        <!-- Verification Badge -->
+        <div class="verification-badge {% if report.is_valid %}valid{% else %}invalid{% endif %}">
+            <div class="verification-icon">{% if report.is_valid %}🛡️{% else %}⚠️{% endif %}</div>
+            <div class="verification-title {% if report.is_valid %}valid{% else %}invalid{% endif %}">
                 {{ report.chain_integrity }}
-            </h1>
-            <p style="font-size: 1.25rem; opacity: 0.9; margin: 0;">
-                {{ report.message }}
-            </p>
+            </div>
+            <div class="verification-message">{{ report.message }}</div>
         </div>
 
-        {% if report.tampering_detected %}
-        <div
-            style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); padding: 2rem; border-radius: 16px; margin-bottom: 2rem; border: 2px solid #ef4444;">
-            <h3 style="color: #991b1b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-exclamation-triangle"></i> TAMPERING DETECTED
-            </h3>
-            <p style="color: #7f1d1d; margin-bottom: 1rem; font-weight: 600;">
-                The blockchain integrity check has failed. One or more blocks have been altered after creation.
-            </p>
-            {% for detail in report.tampering_details %}
-            <div
-                style="background: white; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; border-left: 4px solid #ef4444;">
-                <strong style="color: #991b1b;">Block #{{ detail.block_index }}:</strong>
-                <span style="color: #7f1d1d;">{{ detail.message }}</span>
-                <div style="margin-top: 0.5rem; font-size: 0.875rem;">
-                    <div style="color: #059669;"><strong>Expected Hash:</strong> <code
-                            style="background: #f0fdf4; padding: 0.25rem 0.5rem; border-radius: 4px;">{{ detail.expected_hash[:32] }}...</code>
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Blocks</div>
+                <div class="stat-value">{{ report.total_blocks }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Hash Algorithm</div>
+                <div class="stat-value">SHA-256</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Security</div>
+                <div class="stat-value">Immutable</div>
+            </div>
+        </div>
+
+        <!-- Security Information -->
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 24px; margin-bottom: 32px;">
+            <div class="section-title" style="margin-bottom: 16px;">🔒 How Your Data is Protected</div>
+            
+            <div style="display: grid; gap: 20px;">
+                <div style="display: flex; gap: 16px;">
+                    <div style="flex-shrink: 0; width: 40px; height: 40px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
+                        🔗
                     </div>
-                    <div style="color: #dc2626; margin-top: 0.25rem;"><strong>Actual Hash:</strong> <code
-                            style="background: #fef2f2; padding: 0.25rem 0.5rem; border-radius: 4px;">{{ detail.actual_hash[:32] }}...</code>
+                    <div>
+                        <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">Blockchain Technology</div>
+                        <div style="font-size: 14px; color: #475569; line-height: 1.6;">
+                            Your grievance is stored in a blockchain - a chain of connected blocks. Each block contains a unique fingerprint (hash) that depends on its content and the previous block's hash. If anyone tries to change your complaint, the fingerprint changes and the chain breaks, immediately exposing the tampering.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 16px;">
+                    <div style="flex-shrink: 0; width: 40px; height: 40px; background: #10b981; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
+                        🔐
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">Cryptographic Hashing (SHA-256)</div>
+                        <div style="font-size: 14px; color: #475569; line-height: 1.6;">
+                            We use SHA-256, a military-grade cryptographic algorithm, to create a unique 64-character fingerprint for each block. Even changing a single letter in your complaint would completely change this fingerprint, making tampering mathematically impossible to hide.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 16px;">
+                    <div style="flex-shrink: 0; width: 40px; height: 40px; background: #8b5cf6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
+                        🛡️
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">Immutability - Cannot Be Changed</div>
+                        <div style="font-size: 14px; color: #475569; line-height: 1.6;">
+                            Once your grievance is recorded in a block, it becomes permanent and unchangeable. The blockchain's design ensures that any attempt to modify, delete, or forge records is automatically detected and rejected by the system.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 16px;">
+                    <div style="flex-shrink: 0; width: 40px; height: 40px; background: #f59e0b; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
+                        👁️
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">Transparency & Public Verification</div>
+                        <div style="font-size: 14px; color: #475569; line-height: 1.6;">
+                            Anyone can verify the blockchain's integrity at any time. You don't need to trust us - you can independently verify that your complaint exists and hasn't been tampered with by checking the cryptographic hashes yourself.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 16px;">
+                    <div style="flex-shrink: 0; width: 40px; height: 40px; background: #ef4444; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">
+                        ⚠️
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">Tamper Detection</div>
+                        <div style="font-size: 14px; color: #475569; line-height: 1.6;">
+                            If someone tries to alter any record, the system immediately detects it. The hash chain breaks, and the verification status changes from "VERIFIED" to "INVALID". This makes corruption and data manipulation virtually impossible.
+                        </div>
                     </div>
                 </div>
             </div>
-            {% endfor %}
-            <div style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.5); border-radius: 8px;">
-                <strong style="color: #991b1b;">What This Means:</strong>
-                <ul style="color: #7f1d1d; margin: 0.5rem 0 0 1.5rem; line-height: 1.8;">
-                    <li>Someone modified data in Block #{{ report.tampering_details[0].block_index }}</li>
-                    <li>The cryptographic hash no longer matches</li>
-                    <li>All subsequent blocks are now invalid</li>
-                    <li>This proves the blockchain detected the tampering</li>
+
+            <div style="background: white; border-radius: 8px; padding: 16px; margin-top: 20px; border-left: 4px solid #3b82f6;">
+                <div style="font-weight: 700; color: #0f172a; margin-bottom: 8px;">Why This Matters for You:</div>
+                <ul style="margin: 0; padding-left: 20px; color: #475569; font-size: 14px; line-height: 1.8;">
+                    <li><strong>Your Voice is Protected:</strong> No one can delete or modify your complaint</li>
+                    <li><strong>Accountability:</strong> Officials cannot deny receiving your grievance</li>
+                    <li><strong>Trust:</strong> You can verify your complaint's authenticity anytime</li>
+                    <li><strong>Evidence:</strong> The blockchain serves as permanent, tamper-proof evidence</li>
+                    <li><strong>Transparency:</strong> The system is open and verifiable by anyone</li>
                 </ul>
             </div>
         </div>
-        {% endif %}
 
-        <div class="stats-row">
-            <div class="stat-box">
-                <i class="fas fa-cubes" style="font-size: 2rem; color: #3b82f6;"></i>
-                <h3>{{ report.total_blocks }}</h3>
-                <p>Total Blocks</p>
+        <!-- Visual Example -->
+        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; margin-bottom: 32px;">
+            <div class="section-title" style="margin-bottom: 16px;">📊 How It Works - Simple Example</div>
+            
+            <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 20px; overflow-x: auto; padding: 10px;">
+                <div style="min-width: 180px; background: #f8fafc; border: 2px solid #3b82f6; border-radius: 8px; padding: 16px;">
+                    <div style="font-weight: 700; color: #3b82f6; font-size: 12px; margin-bottom: 8px;">BLOCK #1</div>
+                    <div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">Ticket: #123456</div>
+                    <div style="font-size: 10px; color: #94a3b8; font-family: monospace; word-break: break-all;">Hash: a7f3...</div>
+                </div>
+                
+                <div style="color: #3b82f6; font-size: 24px;">→</div>
+                
+                <div style="min-width: 180px; background: #f8fafc; border: 2px solid #10b981; border-radius: 8px; padding: 16px;">
+                    <div style="font-weight: 700; color: #10b981; font-size: 12px; margin-bottom: 8px;">BLOCK #2</div>
+                    <div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">Ticket: #789012</div>
+                    <div style="font-size: 10px; color: #94a3b8; font-family: monospace; word-break: break-all;">Prev: a7f3...</div>
+                    <div style="font-size: 10px; color: #94a3b8; font-family: monospace; word-break: break-all;">Hash: b2e9...</div>
+                </div>
+                
+                <div style="color: #10b981; font-size: 24px;">→</div>
+                
+                <div style="min-width: 180px; background: #f8fafc; border: 2px solid #8b5cf6; border-radius: 8px; padding: 16px;">
+                    <div style="font-weight: 700; color: #8b5cf6; font-size: 12px; margin-bottom: 8px;">BLOCK #3</div>
+                    <div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">Ticket: #345678</div>
+                    <div style="font-size: 10px; color: #94a3b8; font-family: monospace; word-break: break-all;">Prev: b2e9...</div>
+                    <div style="font-size: 10px; color: #94a3b8; font-family: monospace; word-break: break-all;">Hash: c5d1...</div>
+                </div>
             </div>
-            <div class="stat-box">
-                <i class="fas fa-fingerprint" style="font-size: 2rem; color: #10b981;"></i>
-                <h3>SHA-256</h3>
-                <p>Hash Algorithm</p>
+
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; border-radius: 4px; margin-bottom: 16px;">
+                <div style="font-weight: 700; color: #92400e; font-size: 13px; margin-bottom: 4px;">🔍 What Happens if Someone Tries to Change Block #2?</div>
+                <div style="font-size: 13px; color: #78350f; line-height: 1.6;">
+                    If anyone modifies the data in Block #2, its hash changes from "b2e9..." to something else. But Block #3 still references "b2e9..." as the previous hash. This mismatch immediately exposes the tampering, and the entire chain becomes INVALID.
+                </div>
             </div>
-            <div class="stat-box">
-                <i class="fas fa-lock" style="font-size: 2rem; color: #8b5cf6;"></i>
-                <h3>Immutable</h3>
-                <p>Tamper-Proof</p>
+
+            <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 12px; border-radius: 4px;">
+                <div style="font-weight: 700; color: #065f46; font-size: 13px; margin-bottom: 4px;">✓ Result: Your Data is Safe</div>
+                <div style="font-size: 13px; color: #064e3b; line-height: 1.6;">
+                    This chain reaction makes it impossible to secretly alter any record. Any tampering is immediately visible to everyone, ensuring your grievance remains exactly as you submitted it.
+                </div>
             </div>
         </div>
 
-        <div
-            style="background: white; padding: 2rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-cube"></i> Genesis Block Hash
-            </h3>
-            <div class="hash-display">{{ report.genesis_hash }}</div>
-
-            <h3 style="margin: 1.5rem 0 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                <i class="fas fa-cube"></i> Latest Block Hash
-            </h3>
-            <div class="hash-display">{{ report.latest_hash }}</div>
-        </div>
-
-        <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i class="fas fa-link"></i> Complete Blockchain
-        </h2>
-
+        <!-- Blockchain -->
+        <div class="section-title">Complete Blockchain</div>
         {% for block in report.blocks %}
-        <div class="block-card"
-            style="{% if not block.is_valid %}border-left-color: #ef4444; background: #fef2f2;{% endif %}">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h4 style="margin: 0; color: #0f172a;">
-                    <i class="fas fa-cube"></i> Block #{{ block.index }}
-                </h4>
-                {% if block.is_valid %}
-                <span
-                    style="background: #10b981; color: white; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">
-                    <i class="fas fa-check"></i> VERIFIED
-                </span>
-                {% else %}
-                <span
-                    style="background: #ef4444; color: white; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700;">
-                    <i class="fas fa-times"></i> INVALID
-                </span>
-                {% endif %}
+        <div class="block-card">
+            <div class="block-header">
+                <div class="block-title">Block #{{ block.index }}</div>
+                <div class="block-verified">{% if block.is_valid %}✓ VERIFIED{% else %}✗ INVALID{% endif %}</div>
             </div>
 
-            {% if not block.is_valid %}
-            <div
-                style="background: #fee2e2; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid #ef4444;">
-                <strong style="color: #991b1b;"><i class="fas fa-exclamation-circle"></i> Error:</strong>
-                <span style="color: #7f1d1d;">{{ block.error_message }}</span>
+            <div class="block-info">
+                <div>
+                    <div class="info-label">Timestamp</div>
+                    <div class="info-value">{{ block.timestamp }}</div>
+                </div>
+                <div>
+                    <div class="info-label">Data Records</div>
+                    <div class="info-value">{{ block.data_count }}</div>
+                </div>
+            </div>
+
+            {% if block.grievance_ids and block.grievance_ids|length > 0 %}
+            <div>
+                <div class="info-label">Ticket IDs in this Block</div>
+                <div class="ticket-badges">
+                    {% for gid in block.grievance_ids %}
+                    <span class="ticket-badge">#{{ gid }}</span>
+                    {% endfor %}
+                </div>
             </div>
             {% endif %}
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                <div>
-                    <small style="color: #64748b; font-weight: 600;">Timestamp</small>
-                    <p style="margin: 0.25rem 0 0; color: #0f172a;">{{ block.timestamp }}</p>
-                </div>
-                <div>
-                    <small style="color: #64748b; font-weight: 600;">Data Records</small>
-                    <p style="margin: 0.25rem 0 0; color: #0f172a;">{{ block.data_count }}</p>
-                </div>
+            <div style="margin-top: 12px;">
+                <div class="info-label">Block Hash</div>
+                <div class="hash-display">{{ block.hash }}</div>
             </div>
 
-            <div style="margin-bottom: 0.5rem;">
-                <small style="color: #64748b; font-weight: 600;">Block Hash</small>
-                <div class="hash-display" style="font-size: 0.75rem;">{{ block.hash }}</div>
-            </div>
-
-            <div>
-                <small style="color: #64748b; font-weight: 600;">Previous Hash</small>
-                <div class="hash-display" style="font-size: 0.75rem;">{{ block.previous_hash }}</div>
+            <div style="margin-top: 12px;">
+                <div class="info-label">Previous Hash</div>
+                <div class="hash-display">{{ block.previous_hash }}</div>
             </div>
         </div>
-
-        {% if not loop.last %}
-        <div class="chain-link">
-            <i class="fas fa-arrow-down" style="font-size: 1.5rem;"></i>
-        </div>
-        {% endif %}
         {% endfor %}
-
-
-
-        <div
-            style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 2rem; border-radius: 16px; margin-top: 2rem; border: 2px solid #bae6fd;">
-            <h4 style="color: #0369a1; margin-bottom: 1rem;">
-                <i class="fas fa-info-circle"></i> How Blockchain Verification Works
-            </h4>
-            <ul style="color: #0c4a6e; line-height: 1.8;">
-                <li><strong>Cryptographic Hashing:</strong> Each block contains a SHA-256 hash of the previous block
-                </li>
-                <li><strong>Chain Integrity:</strong> Any tampering breaks the hash chain and is immediately detected
-                </li>
-                <li><strong>Immutability:</strong> Once recorded, grievance data cannot be altered or deleted</li>
-                <li><strong>Transparency:</strong> All blocks can be independently verified by anyone</li>
-            </ul>
-        </div>
     </div>
-
-
 </body>
-
 </html>

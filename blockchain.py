@@ -9,7 +9,6 @@ class Blockchain:
         self.pending_data = []
         self.create_block(proof=1, previous_hash='0', data='Genesis Block')
 
-    # Create a new block and add it to the chain
     def create_block(self, proof, previous_hash, data=None):
         block = {
             'index': len(self.chain) + 1,
@@ -22,7 +21,6 @@ class Blockchain:
         self.chain.append(block)
         return block
 
-    # Add grievance data to be included in next block
     def add_data(self, grievance_id, audio_hash, status):
         data = {
             'grievance_id': grievance_id,
@@ -33,16 +31,13 @@ class Blockchain:
         self.pending_data.append(data)
         return data
 
-    # Get the most recent block in the chain
     def get_last_block(self):
         return self.chain[-1]
 
-    # Generate SHA-256 hash of a block
     def hash(self, block):
         encoded_block = json.dumps(block, sort_keys=True).encode()
         return hashlib.sha256(encoded_block).hexdigest()
 
-    # Verify blockchain integrity by checking all hash links
     def is_chain_valid(self):
         previous_block = self.chain[0]
         block_index = 1
@@ -68,7 +63,6 @@ class Blockchain:
         
         return True, "✅ Blockchain is valid and immutable", []
 
-    # Generate detailed verification report for admin dashboard
     def get_verification_report(self):
         is_valid, message, tampering_details = self.is_chain_valid()
         
@@ -96,12 +90,20 @@ class Blockchain:
                     is_block_valid = False
                     error_message = "Hash chain broken - data may have been altered"
             
+            # Extract grievance IDs from block data
+            grievance_ids = []
+            if isinstance(block['data'], list):
+                for data in block['data']:
+                    if isinstance(data, dict) and 'grievance_id' in data:
+                        grievance_ids.append(data['grievance_id'])
+            
             report['blocks'].append({
                 'index': block['index'],
                 'hash': block_hash,
                 'previous_hash': block['previous_hash'],
                 'timestamp': datetime.fromtimestamp(block['timestamp']).strftime('%Y-%m-%d %H:%M:%S'),
                 'data_count': len(block['data']) if isinstance(block['data'], list) else 1,
+                'grievance_ids': grievance_ids,
                 'is_valid': is_block_valid,
                 'error_message': error_message
             })
@@ -110,7 +112,6 @@ class Blockchain:
         
         return report
 
-    # Find which block contains a specific grievance ID
     def find_grievance_in_chain(self, grievance_id):
         for block in self.chain:
             if isinstance(block['data'], list):

@@ -1,157 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prahari | Enterprise Admin Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <title>PRAHARI - Admin Dashboard</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    <nav class="navbar-premium">
-        <div class="container-fluid px-4">
-            <div class="d-flex align-items-center">
-                <div class="logo-container">
-                    <i class="fas fa-shield-halved"></i>
-                    <span class="logo-text">PRAHARI</span>
-                    <span class="logo-subtitle">Blockchain Governance</span>
-                </div>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <div class="brand">PRAHARI</div>
+                <nav class="nav-menu">
+                    <a href="/dashboard"
+                        class="nav-item {% if view == 'dashboard' or not view %}active{% endif %}">Dashboard</a>
+                    <a href="/all_grievances" class="nav-item {% if view == 'all' %}active{% endif %}">All
+                        Grievances</a>
+                    <a href="/analytics" class="nav-item {% if view == 'analytics' %}active{% endif %}">Analytics</a>
+                </nav>
             </div>
-            <div class="d-flex align-items-center gap-4">
-                <div class="node-status">
-                    <span class="pulse-dot"></span>
-                    <span class="node-text">Node Active</span>
-                </div>
-                <div class="blockchain-badge">
-                    <i class="fas fa-cube"></i>
-                    <span>{{ chain_len }} Blocks</span>
-                </div>
-                <a href="/verify_blockchain" class="verify-btn">
-                    <i class="fas fa-shield-check"></i>
-                    <span>Verify Chain</span>
+            <div class="sidebar-footer">
+                <a href="/verify_blockchain" target="_blank" class="verify-link" style="margin-bottom: 12px;">Public Verification Page</a>
+                <a href="/logout" class="verify-link" style="border-color: #ef4444; color: #ef4444;" onclick="return confirm('Are you sure you want to logout?')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                    Logout
                 </a>
             </div>
-        </div>
-    </nav>
+        </aside>
 
-    <div class="main-container">
-        <div class="stats-grid">
-            <div class="stat-card stat-card-primary">
-                <div class="stat-icon"><i class="fas fa-file-lines"></i></div>
-                <div class="stat-content">
-                    <div class="stat-label">Total Grievances</div>
-                    <div class="stat-value">{{ db|length }}</div>
-                    <div class="stat-trend"><i class="fas fa-arrow-up"></i> Active Cases</div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="breadcrumbs">
+                    {% if view == 'all' %}
+                    All Grievances > Complete List
+                    {% elif view == 'analytics' %}
+                    Analytics > Overview
+                    {% else %}
+                    Dashboard > Pending Grievances
+                    {% endif %}
                 </div>
+                {% if view != 'analytics' %}
+                <input type="text" id="globalSearch" class="search-input"
+                    placeholder="Search by ID, Status, or Content...">
+                {% endif %}
             </div>
-            <div class="stat-card stat-card-success">
-                <div class="stat-icon"><i class="fas fa-link"></i></div>
-                <div class="stat-content">
-                    <div class="stat-label">Blocks Mined</div>
+
+            <!-- Stats Overview -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-label">Total Blocks</div>
                     <div class="stat-value">{{ chain_len }}</div>
-                    <div class="stat-trend"><i class="fas fa-check-circle"></i> Immutable</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Grievances</div>
+                    <div class="stat-value">{{ all_db|length }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Pending</div>
+                    <div class="stat-value pending-count">{{ all_db.values()|selectattr('status', 'equalto',
+                        'Pending')|list|length }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Resolved</div>
+                    <div class="stat-value resolved-count">{{ all_db.values()|selectattr('status', 'equalto',
+                        'Resolved')|list|length }}</div>
                 </div>
             </div>
-            <div class="stat-card stat-card-info">
-                <div class="stat-icon"><i class="fas fa-server"></i></div>
-                <div class="stat-content">
-                    <div class="stat-label">System Health</div>
-                    <div class="stat-value">99.9%</div>
-                    <div class="stat-trend"><i class="fas fa-heartbeat"></i> Operational</div>
-                </div>
-            </div>
-        </div>
 
-        <div class="search-section">
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search by Ticket ID, Status, or Category...">
-            </div>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all"><i class="fas fa-list"></i> All</button>
-                <button class="filter-btn" data-filter="Pending"><i class="fas fa-clock"></i> Pending</button>
-                <button class="filter-btn" data-filter="Processing"><i class="fas fa-spinner"></i> Processing</button>
-                <button class="filter-btn" data-filter="Resolved"><i class="fas fa-check"></i> Resolved</button>
-            </div>
-        </div>
+            <!-- Analytics View -->
+            {% if view == 'analytics' %}
+            <div class="analytics-container">
+                <div class="analytics-section">
+                    <h2 class="section-title">Category Breakdown</h2>
+                    <div class="category-grid">
+                        {% for category, count in analytics.categories.items() %}
+                        <div class="category-card">
+                            <div class="category-name">{{ category }}</div>
+                            <div class="category-count">{{ count }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
 
-        {% if not db %}
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <h3>No Grievances Yet</h3>
-            <p>Waiting for incoming calls to populate the dashboard...</p>
-        </div>
-        {% else %}
-        <div class="grievances-grid" id="grievancesGrid">
-            {% for id, info in db.items() %}
-            <div class="grievance-card" data-id="{{ id }}" data-status="{{ info.status }}" data-priority="{% if 'High' in info.ai_report %}high{% elif 'Medium' in info.ai_report %}medium{% elif 'Low' in info.ai_report %}low{% else %}normal{% endif %}">
-                <div class="card-header-custom">
-                    <div class="ticket-id"><i class="fas fa-hashtag"></i><span>{{ id }}</span></div>
-                    <span class="status-badge status-{{ info.status|lower }}">{{ info.status }}</span>
-                </div>
-                <div class="priority-bar priority-{% if 'High' in info.ai_report %}high{% elif 'Medium' in info.ai_report %}medium{% elif 'Low' in info.ai_report %}low{% else %}normal{% endif %}"></div>
-                <div class="location-section" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #fbbf24;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #92400e; font-weight: 700; font-size: 0.875rem;">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Location Details</span>
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; font-size: 0.875rem;">
-                        <div>
-                            <div style="color: #78350f; font-weight: 600; margin-bottom: 0.25rem;">State</div>
-                            <div style="color: #92400e;">{{ info.state }}</div>
+                <div class="analytics-section">
+                    <h2 class="section-title">Status Distribution</h2>
+                    <div class="status-chart">
+                        <div class="chart-bar">
+                            <div class="bar-label">Pending</div>
+                            <div class="bar-container">
+                                {% set pending_percent = (analytics.pending / analytics.total * 100)|round if analytics.total > 0 else 0 %}
+                                <div class="bar-fill pending-bar" data-width="{{ pending_percent }}"></div>
+                                <span class="bar-value">{{ analytics.pending }}</span>
+                            </div>
                         </div>
-                        <div>
-                            <div style="color: #78350f; font-weight: 600; margin-bottom: 0.25rem;">City</div>
-                            <div style="color: #92400e;">{{ info.city }}</div>
-                        </div>
-                        <div>
-                            <div style="color: #78350f; font-weight: 600; margin-bottom: 0.25rem;">Area</div>
-                            <div style="color: #92400e;">{{ info.location }}</div>
+                        <div class="chart-bar">
+                            <div class="bar-label">Resolved</div>
+                            <div class="bar-container">
+                                {% set resolved_percent = (analytics.resolved / analytics.total * 100)|round if analytics.total > 0 else 0 %}
+                                <div class="bar-fill resolved-bar" data-width="{{ resolved_percent }}"></div>
+                                <span class="bar-value">{{ analytics.resolved }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="ai-section">
-                    <div class="ai-header"><i class="fas fa-robot"></i><span>AI Analysis Report</span></div>
-                    <div class="ai-content">{{ info.ai_report }}</div>
-                </div>
-                <div class="audio-section">
-                    <div class="audio-label"><i class="fas fa-microphone"></i> Voice Recording</div>
-                    <audio controls class="custom-audio-player">
-                        <source src="{{ info.url }}" type="audio/wav">
-                        <source src="{{ info.url }}" type="audio/mpeg">
-                    </audio>
-                </div>
-                <div class="hash-section">
-                    <div class="hash-label">
-                        <i class="fas fa-fingerprint"></i> Blockchain Proof
-                        <span class="verified-badge"><i class="fas fa-shield-check"></i> Verified</span>
-                    </div>
-                    <div class="hash-container">
-                        <code class="hash-code" id="hash-{{ id }}">{{ info.hash }}</code>
-                        <button class="copy-btn" onclick="copyHash('{{ id }}', '{{ info.hash }}')" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
-                    </div>
-                </div>
-                <form action="/update_status" method="POST" class="action-form">
-                    <input type="hidden" name="g_id" value="{{ id }}">
-                    <div class="action-group">
-                        <select name="new_status" class="status-select">
-                            <option value="Pending" {% if info.status=='Pending' %}selected{% endif %}>Pending</option>
-                            <option value="Processing" {% if info.status=='Processing' %}selected{% endif %}>Processing</option>
-                            <option value="Resolved" {% if info.status=='Resolved' %}selected{% endif %}>Resolved</option>
-                            <option value="Rejected" {% if info.status=='Rejected' %}selected{% endif %}>Rejected</option>
-                        </select>
-                        <button type="submit" class="update-btn"><i class="fas fa-sync-alt"></i> Update</button>
-                    </div>
-                </form>
             </div>
-            {% endfor %}
-        </div>
-        {% endif %}
+            {% else %}
+            <!-- Grievance Grid -->
+            <div class="grievance-grid">
+                {% if db|length == 0 %}
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <div class="empty-text">
+                        {% if view == 'dashboard' %}
+                        No pending grievances. Great job!
+                        {% else %}
+                        No grievances found.
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                {% for g_id, info in db.items() %}
+                <div class="grievance-item" data-id="{{ g_id }}" data-status="{{ info.status }}"
+                    data-content="{{ info.ai_report }}">
+                    <!-- Top Row -->
+                    <div class="item-header">
+                        <div class="header-left">
+                            <div class="item-id">#{{ g_id }}</div>
+                            <div class="item-timestamp">{{ info.timestamp if info.timestamp else 'N/A' }}</div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="status-badge status-{{ info.status|lower }}">{{ info.status }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Location Row -->
+                    <div class="location-bar">
+                        <svg class="location-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                        </svg>
+                        <span class="location-text">{{ info.location if info.location else 'N/A' }}, {{ info.city if
+                            info.city else 'N/A' }}, {{ info.state if info.state else 'N/A' }}</span>
+                    </div>
+
+                    <!-- AI Analysis Section -->
+                    <div class="ai-analysis-section">
+                        <div class="ai-header">
+                            <svg class="ai-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z" />
+                            </svg>
+                            <span class="ai-title">AI Analysis</span>
+                        </div>
+                        <div class="ai-summary" data-gid="{{ g_id }}">{{ info.ai_report }}</div>
+                    </div>
+
+                    <!-- Audio Player -->
+                    {% if info.url and info.url != 'pending' and info.url != 'error' %}
+                    <div class="audio-player">
+                        <button class="play-btn">
+                            <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                            <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                            </svg>
+                        </button>
+                        <div class="audio-progress">
+                            <div class="progress-bar"></div>
+                        </div>
+                        <audio src="/static/{{ info.url }}" preload="metadata"></audio>
+                    </div>
+                    {% else %}
+                    <div class="audio-player">
+                        <div style="color: #94a3b8; font-size: 12px; padding: 8px;">
+                            {% if info.url == 'pending' %}⏳ Audio processing...{% elif info.url == 'error' %}❌ Audio
+                            unavailable{% else %}🔄 Loading...{% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Bottom Row -->
+                    <div class="item-footer">
+                        <div class="hash-display">
+                            <span class="hash-label">sha256:</span>
+                            <code class="hash-value" title="{{ info.hash }}">{{ info.hash[:16] }}...</code>
+                            <button class="copy-btn" data-hash="{{ info.hash }}">Copy</button>
+                        </div>
+                        <div class="item-controls">
+                            <select class="status-select" data-id="{{ g_id }}">
+                                <option value="Pending" {% if info.status=='Pending' %}selected{% endif %}>Pending
+                                </option>
+                                <option value="Resolved" {% if info.status=='Resolved' %}selected{% endif %}>Resolved
+                                </option>
+                            </select>
+                            <button class="save-btn" data-id="{{ g_id }}">Save</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </main>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/admin.js"></script>
+
+    <script src="/static/script.js"></script>
 </body>
+
 </html>
-""
