@@ -254,10 +254,14 @@ def process_audio_async(recording_url, g_id):
                 grievance_db[g_id]['hash'] = file_hash
                 grievance_db[g_id]['ai_report'] = ai_analysis
                 
-                prahari_chain.add_data(g_id, file_hash, 'Pending')
+                # Register on blockchain (Ethereum if configured, otherwise local)
+                blockchain_result = prahari_chain.add_data(g_id, file_hash, 'Pending')
+                
+                # Also maintain local chain for compatibility
                 previous_block = prahari_chain.get_last_block()
-                previous_hash = prahari_chain.hash(previous_block)
-                prahari_chain.create_block(proof=len(grievance_db), previous_hash=previous_hash)
+                if previous_block:
+                    previous_hash = prahari_chain.hash(previous_block)
+                    prahari_chain.create_block(proof=len(grievance_db), previous_hash=previous_hash)
                 
                 print(f"✅ Background processing complete for {g_id}")
         else:
