@@ -7,6 +7,7 @@ import threading
 from flask import Flask, request, render_template, redirect, url_for, jsonify, session
 from functools import wraps
 from twilio.twiml.voice_response import VoiceResponse, Gather
+from twilio.rest import Client
 from dotenv import load_dotenv
 import google.generativeai as genai
 from blockchain import Blockchain
@@ -20,6 +21,11 @@ grievance_db = {}  # in-memory storage for grievances
 
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+
+# initialize Twilio client for SMS
+twilio_client = Client(os.getenv('account_sid'), os.getenv('auth_token'))
+TWILIO_NUMBER = os.getenv('twilio_number')
+my_mobile_number=os.getenv('my_mobile_number')
 
 def login_required(f):
     @wraps(f)
@@ -45,6 +51,30 @@ def get_greeting():
         return "Namaste. Prahari helpline mein aapka swagat hai."
     else:
         return "Namaste. Prahari mein aapka swagat hai."
+
+def send_sms_acknowledgment(phone_number, grievance_id):
+    """Sends SMS confirmation after grievance registration"""
+    try:
+        message = twilio_client.messages.create(
+            body=f"Grievance Registered. Your Tracking ID is {grievance_id}. Track at https://codi-interpressure-jacqui.ngrok-free.dev/verify_blockchain",
+            from_=TWILIO_NUMBER,
+            to=my_mobile_number
+        )
+        print(f"✅ SMS sent to {my_mobile_number}: {message.sid}")
+    except Exception as e:
+        print(f"❌ SMS failed: {str(e)}")
+
+def send_resolution_sms(phone_number, grievance_id):
+    """Sends SMS when grievance is resolved"""
+    try:
+        message = twilio_client.messages.create(
+            body=f"Your grievance (ID: {grievance_id}) has been resolved. Thank you for using PRAHARI.",
+            from_=TWILIO_NUMBER,
+            to=my_mobile_number
+        )
+        print(f"✅ Resolution SMS sent to {my_mobile_number}: {message.sid}")
+    except Exception as e:
+        print(f"❌ Resolution SMS failed: {str(e)}")
 
 def analyze_audio_with_ai(file_path):
     """Uses Gemini AI to transcribe and categorize audio complaints"""
@@ -183,6 +213,7 @@ def save_location():
 def handle_recording():
     """Handles audio recording from Twilio and generates ticket ID"""
     recording_url = request.values.get("RecordingUrl")
+    caller_number = request.values.get("From")  # get caller's phone number
     g_id = str(random.randint(100000, 999999))  # generate 6-digit ticket
     ai_analysis = "🔄 AI Analysis in Progress..."
     file_hash = "Pending"
@@ -206,6 +237,7 @@ def handle_recording():
         'state': state,
         'city': city,
         'location': location,
+        'phone': caller_number,
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
     
@@ -213,7 +245,11 @@ def handle_recording():
     formatted_id = " ".join(g_id)
     resp.say("Aapki shikayat register ho gayi hai aur blockchain par secure kar di gayi hai.", voice='Polly.Aditi', language='en-IN')
     resp.say(f"Aapka tracking number hai {formatted_id}. Ek baar phir, {formatted_id}.", voice='Polly.Aditi', language='en-IN')
-    resp.say("AI analysis kuch hi minutes mein complete ho jayega.", voice='Polly.Aditi', language='en-IN')
+    resp.say("Aapko SMS bhi bheja jayega. Dhanyavaad.", voice='Polly.Aditi', language='en-IN')
+    
+    # send SMS acknowledgment
+    if caller_number:
+        send_sms_acknowledgment(caller_number, g_id)
     
     if recording_url:
         thread = threading.Thread(target=process_audio_async, args=(recording_url, g_id))
@@ -373,10 +409,20 @@ def analytics():
 @app.route("/update_status", methods=['POST'])
 @login_required
 def update_status():
+    """Updates grievance status and sends SMS if resolved"""
     g_id = request.form.get('g_id')
     new_status = request.form.get('new_status')
+    
     if g_id in grievance_db:
+        old_status = grievance_db[g_id]['status']
         grievance_db[g_id]['status'] = new_status
+        
+        # send SMS if status changed to Resolved
+        if new_status == 'Resolved' and old_status != 'Resolved':
+            phone_number = grievance_db[g_id].get('phone')
+            if phone_number:
+                send_resolution_sms(phone_number, g_id)
+    
     return redirect(url_for('admin'))
 
 @app.route("/verify_blockchain")

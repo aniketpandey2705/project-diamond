@@ -8,12 +8,20 @@ PRAHARI is a citizen-centric platform that enables people to register complaints
 
 ## Key Features
 
+### 📱 SMS Notifications
+- **Registration Confirmation**: Instant SMS with tracking ID and verification link
+- **Resolution Updates**: Automatic SMS when admin resolves complaint
+- No need for citizens to repeatedly call back
+- Works on any phone - no smartphone required
+
 ### 🎙️ Voice-Based IVR System
 - Twilio-powered voice interface with Hinglish prompts
 - No app or internet required - just a phone call
 - Speech recognition for location and complaint details
 - Time-based greetings for personalized experience
 - 60-second audio recording for detailed complaints
+- **SMS acknowledgment** with tracking ID sent immediately after registration
+- **SMS notification** when grievance is resolved by admin
 
 ### 🤖 AI-Powered Analysis
 - Google Gemini AI for automatic transcription
@@ -108,10 +116,18 @@ ETH_PRIVATE_KEY=your_private_key_here
 python app.py
 ```
 
-5. **Access the system**
+5. **Set up ngrok for Twilio (Development)**
+```bash
+# In a new terminal
+ngrok http 5000
+```
+Copy the HTTPS URL and configure it in Twilio (see Configuration section below)
+
+6. **Access the system**
 - Admin Dashboard: http://localhost:5000/login
 - Public Verification: http://localhost:5000/verify_blockchain
 - IVR: Call your Twilio number
+- ngrok Dashboard: http://localhost:4040
 
 ## Project Structure
 
@@ -147,16 +163,22 @@ prahari/
    - Provide your state, city, and area when prompted
    - Record your complaint after the beep (max 60 seconds)
    - Note down the 6-digit ticket ID announced
+   - **Receive SMS confirmation** with tracking link
 
 2. **Check Status**
    - Call the Twilio number
    - Press 2 to check status
    - Enter your 6-digit ticket ID
+   - Or click the link in your SMS
 
 3. **Verify on Blockchain**
    - Visit http://localhost:5000/verify_blockchain
    - Enter your 6-digit ticket ID
    - View blockchain verification details
+
+4. **Get Resolution Updates**
+   - **Automatic SMS notification** when admin resolves your complaint
+   - No need to keep calling back
 
 ### For Administrators
 
@@ -174,6 +196,7 @@ prahari/
    - Listen to audio recordings
    - Read AI analysis reports
    - Update status (Pending → Resolved)
+   - **SMS automatically sent** to citizen when marked as Resolved
 
 ## Security Features
 
@@ -235,6 +258,67 @@ The system automatically uses Ethereum if configured, otherwise falls back to lo
 3. Configure webhook URL: `https://your-domain.com/voice`
 4. Add credentials to `.env`
 
+### Using ngrok for Local Development
+
+Since Twilio needs a public URL to send webhooks, use ngrok to expose your local server:
+
+1. **Install ngrok**
+   - Download from https://ngrok.com/download
+   - Or install via package manager:
+   ```bash
+   # Windows (Chocolatey)
+   choco install ngrok
+   
+   # Mac
+   brew install ngrok
+   
+   # Linux
+   snap install ngrok
+   ```
+
+2. **Start your Flask app**
+   ```bash
+   python app.py
+   ```
+   Your app runs on `http://localhost:5000`
+
+3. **Start ngrok in a new terminal**
+   ```bash
+   ngrok http 5000
+   ```
+   
+   You'll see output like:
+   ```
+   Forwarding  https://abc123.ngrok.io -> http://localhost:5000
+   ```
+
+4. **Configure Twilio Dashboard**
+   
+   This is where you tell the phone number to use your code:
+   
+   - Log in to your [Twilio Console](https://console.twilio.com/)
+   - Go to **Phone Numbers** → **Manage** → **Active Numbers**
+   - Click on your **Trial Number** (e.g., +1 555...)
+   - Scroll down to the **"Voice & Fax"** section
+   - Find the field labeled **"A Call Comes In"**
+   - Ensure the dropdown is set to **Webhook**
+   - Paste your ngrok URL and add `/voice` at the end
+     - Format: `[YOUR_NGROK_URL]/voice`
+     - Example: `https://a1b2-c3d4.ngrok-free.app/voice`
+   - Make sure **HTTP Method** is set to **POST**
+   - Click **Save** (usually at the bottom of the page)
+
+5. **Test the system**
+   - Call your Twilio number
+   - The call will be forwarded to your local Flask app via ngrok
+   - Check ngrok dashboard at `http://localhost:4040` to see requests
+
+**Important Notes:**
+- Free ngrok URLs change every time you restart ngrok
+- Update Twilio webhook URL each time you restart ngrok
+- For production, use a permanent domain (Heroku, AWS, etc.)
+- Keep ngrok running while testing
+
 ### Google AI Setup
 1. Get API key from https://makersuite.google.com/app/apikey
 2. Add to `.env` as `GOOGLE_API_KEY`
@@ -252,6 +336,19 @@ See [BLOCKCHAIN.md](BLOCKCHAIN.md) for detailed instructions on:
 - Check Twilio webhook configuration
 - Verify `account_sid` and `auth_token` in `.env`
 - Ensure recordings folder has write permissions
+- **Check ngrok is running** and URL is updated in Twilio
+
+### SMS Not Sending
+- Verify `twilio_number` is set correctly in `.env`
+- Check Twilio account has SMS capabilities enabled
+- For trial accounts, verify recipient number is verified in Twilio
+- Check console logs for SMS error messages
+
+### ngrok Issues
+- **URL changed**: Restart ngrok and update Twilio webhook URL
+- **Connection refused**: Make sure Flask app is running on port 5000
+- **Timeout errors**: Check firewall settings
+- **View requests**: Open `http://localhost:4040` to see ngrok dashboard
 
 ### AI Analysis Failing
 - Verify `GOOGLE_API_KEY` is valid
@@ -302,10 +399,11 @@ Check console output for:
 - [ ] Review security best practices
 
 ### Recommended Hosting
-- **Backend**: Heroku, AWS, DigitalOcean
+- **Backend**: Heroku, AWS, DigitalOcean, Railway
 - **Blockchain**: Ethereum mainnet or Polygon
 - **Storage**: AWS S3 for audio files
 - **Database**: PostgreSQL or MongoDB
+- **No ngrok needed**: Use permanent domain with HTTPS
 
 ## Contributing
 
