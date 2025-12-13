@@ -1,24 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-/**
- * @title GrievanceRegistry
- * @notice A simple smart contract to store grievance hashes on Ethereum blockchain
- * @dev Stores minimal data (grievance ID and audio hash) for tamper-proof verification
- */
 contract GrievanceRegistry {
-    // Structure to store grievance information
     struct Grievance {
-        string grievanceId;      // 6-digit ticket ID
-        bytes32 audioHash;       // SHA-256 hash of audio file
-        uint256 timestamp;       // Block timestamp when registered
-        address registeredBy;    // Address that registered the grievance
+        string grievanceId;
+        bytes32 audioHash;
+        uint256 timestamp;
+        address registeredBy;
     }
     
-    // Mapping from grievance ID to Grievance struct
     mapping(string => Grievance) public grievances;
-    
-    // Array to store all grievance IDs for enumeration
     string[] public grievanceIds;
     
     // Event emitted when a new grievance is registered

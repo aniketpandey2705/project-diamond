@@ -20,7 +20,6 @@ if not all([account_sid, auth_token, twilio_number, my_mobile_number]):
 client = Client(account_sid, auth_token)
 
 print(f"Calling {my_mobile_number}...")
-889297
 call = client.calls.create(
     to=my_mobile_number,
     from_=twilio_number,

@@ -14,12 +14,12 @@ from blockchain import Blockchain
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'prahari-secret-key-change-in-production')
+app.secret_key = os.getenv('SECRET_KEY')
 prahari_chain = Blockchain()
-grievance_db = {}
+grievance_db = {}  # in-memory storage for grievances
 
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'prahari@2024')
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 
 def login_required(f):
     @wraps(f)
@@ -37,6 +37,7 @@ genai.configure(api_key=GOOGLE_API_KEY)
 gemini_model = genai.GenerativeModel('gemini-2.5-flash')
 
 def get_greeting():
+    """Returns time-appropriate greeting in Hinglish"""
     hour = datetime.datetime.now().hour
     if hour < 12:
         return "Namaste. Aap ka swagat hai Prahari mein."
@@ -46,21 +47,20 @@ def get_greeting():
         return "Namaste. Prahari mein aapka swagat hai."
 
 def analyze_audio_with_ai(file_path):
+    """Uses Gemini AI to transcribe and categorize audio complaints"""
     try:
         if not os.path.exists(file_path):
             return f"Error: Audio file not found"
         
         audio_file = genai.upload_file(file_path)
         
-        prompt = """
-        Listen to this audio grievance complaint and analyze it. Return a summary in this format:
+        prompt = """Listen to this audio grievance complaint and analyze it. Return a summary in this format:
         
         Transcription: [What the person said]
         Category: [Water/Road/Electricity/Medical/Corruption/Other]
         Summary: [1 sentence summary of the complaint]
         Sentiment: [Urgent/Calm/Angry]
-        Priority: [High/Medium/Low]
-        """
+        Priority: [High/Medium/Low]"""
         
         gemini_response = gemini_model.generate_content([prompt, audio_file])
         return gemini_response.text
@@ -181,8 +181,9 @@ def save_location():
 
 @app.route("/handle_recording", methods=['GET', 'POST'])
 def handle_recording():
+    """Handles audio recording from Twilio and generates ticket ID"""
     recording_url = request.values.get("RecordingUrl")
-    g_id = str(random.randint(100000, 999999))
+    g_id = str(random.randint(100000, 999999))  # generate 6-digit ticket
     ai_analysis = "🔄 AI Analysis in Progress..."
     file_hash = "Pending"
     local_audio_path = None
@@ -193,6 +194,7 @@ def handle_recording():
     city = location_data.get('city', 'Not provided')
     location = location_data.get('location', 'Not provided')
     
+    # clean up temporary session data
     if session_id in grievance_db:
         del grievance_db[session_id]
     
@@ -221,6 +223,7 @@ def handle_recording():
     return str(resp)
 
 def process_audio_async(recording_url, g_id):
+    """Background task to download audio, generate hash, and run AI analysis"""
     try:
         os.makedirs('static/recordings', exist_ok=True)
         saved_filename = f"static/recordings/{g_id}.wav"
@@ -229,17 +232,21 @@ def process_audio_async(recording_url, g_id):
         account_sid = os.getenv('account_sid')
         auth_token = os.getenv('auth_token')
         
+        # download audio from Twilio
         response = requests.get(recording_url + ".wav", auth=(account_sid, auth_token), timeout=30)
         
         if response.status_code == 200 and len(response.content) > 1000:
             with open(temp_filename, 'wb') as f:
                 f.write(response.content)
             
+            # generate SHA-256 hash for blockchain
             with open(temp_filename, "rb") as f:
                 file_hash = hashlib.sha256(f.read()).hexdigest()
             
+            # run AI analysis
             ai_analysis = analyze_audio_with_ai(temp_filename)
             
+            # save permanent copy
             with open(temp_filename, 'rb') as src:
                 with open(saved_filename, 'wb') as dst:
                     dst.write(src.read())
@@ -254,10 +261,10 @@ def process_audio_async(recording_url, g_id):
                 grievance_db[g_id]['hash'] = file_hash
                 grievance_db[g_id]['ai_report'] = ai_analysis
                 
-                # Register on blockchain (Ethereum if configured, otherwise local)
+                # register on blockchain
                 blockchain_result = prahari_chain.add_data(g_id, file_hash, 'Pending')
                 
-                # Also maintain local chain for compatibility
+                # maintain local chain as backup
                 previous_block = prahari_chain.get_last_block()
                 if previous_block:
                     previous_hash = prahari_chain.hash(previous_block)
@@ -331,12 +338,14 @@ def all_grievances():
 @app.route("/analytics")
 @login_required
 def analytics():
+    """Generates analytics dashboard with category breakdown"""
     chain_length = len(prahari_chain.chain) if hasattr(prahari_chain, 'chain') else 0
     
     total = len(grievance_db)
     pending = sum(1 for v in grievance_db.values() if v.get('status') == 'Pending')
     resolved = sum(1 for v in grievance_db.values() if v.get('status') == 'Resolved')
     
+    # extract categories from AI reports
     categories = {}
     for v in grievance_db.values():
         report = v.get('ai_report', '')
